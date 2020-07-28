@@ -1,0 +1,47 @@
+function getLookUpDetails(){
+var lookUPContact=Xrm.Page.data.entity.attributes.get("cr406_receivefrom").getValue();
+if(lookUPContact!=null)
+{
+	var Entityname=lookUPContact[0].entityType;
+	var ContactId1=lookUPContact[0].id;
+	var ContactName= lookUPContact[0].name;
+	var ContactId= ContactId1.replace(/{|\}/g,"");
+	var req = new XMLHttpRequest();
+	var url= Xrm.Page.context.getClientUrl() + "/api/data/v8.2/contacts(" + ContactId + ")?$select=address1_city,address1_country,address1_line1,address1_line2,address1_line3,address1_name,address1_postalcode,address1_stateorprovince";
+req.open("GET",url, false);
+req.setRequestHeader("OData-MaxVersion", "4.0");
+req.setRequestHeader("OData-Version", "4.0");
+req.setRequestHeader("Accept", "application/json");
+req.setRequestHeader("Content-Type", "application/json; charset=utf-8");
+req.setRequestHeader("Prefer", "odata.include-annotations=\"*\"");
+
+req.onreadystatechange = function() {
+    if (this.readyState === 4) {
+        req.onreadystatechange = null;
+        if (this.status === 200) {
+            var result = JSON.parse(this.response);
+            var address1_city = result["address1_city"];
+            var address1_country = result["address1_country"];
+            var address1_line1 = result["address1_line1"];
+            var address1_line2 = result["address1_line2"];
+            //var address1_line3 = result["address1_line3"];
+            var address1_name = result["address1_name"];
+            var address1_postalcode = result["address1_postalcode"];
+            var address1_stateorprovince = result["address1_stateorprovince"];
+			Xrm.Page.getAttribute("cr406_houseno").setValue(address1_name);
+			Xrm.Page.getAttribute("cr406_cityname").setValue(address1_city);
+			Xrm.Page.getAttribute("cr406_countryname").setValue(address1_country);
+			Xrm.Page.getAttribute("cr406_streetname").setValue(address1_line1);
+			Xrm.Page.getAttribute("cr406_buildingname").setValue(address1_line2);
+			Xrm.Page.getAttribute("cr406_postalcode").setValue(address1_postalcode);
+        } else {
+            Xrm.Utility.alertDialog(this.statusText);
+        }
+    }
+};
+req.send();
+}
+
+}
+
+ 
